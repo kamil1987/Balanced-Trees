@@ -1,0 +1,67 @@
+   /* Class node is defined as :
+    class Node 
+       int val;   //Value
+       int ht;      //Height
+       Node left;   //Left child
+       Node right;   //Right child
+
+   */
+
+   static Node insert(Node root,int val)
+    {
+      if(root == null){
+        Node onlyOneElement = new Node();
+        onlyOneElement.val = val;
+        return onlyOneElement;   
+    }
+    
+       
+        Node newRoot = root;
+        Node insertThis = new Node();
+        insertThis.val = val;
+        Node prev=null;
+    
+          while(root != null){
+              prev = root;
+              if(val <= root.val){
+                  root = root.left;
+              }
+              else{
+                  root = root.right;
+              }
+                  
+          }
+          if(val > prev.val)
+              prev.right = insertThis;
+          else
+              prev.left = insertThis;
+
+      return newRoot;
+    }
+
+static void balance(Node root){
+    int leftH = height(root.left);
+    int rightH = height (root.right);
+    
+    if (leftH - rightH > 1){ //balansuj w lewo
+        
+    }else{ // balansuj w prawo
+        
+    }
+}
+
+static int height(Node root) {
+        
+    if (root == null) {
+        return -1;
+    }
+
+    int lefth = height(root.left);
+    int righth = height(root.right);
+
+    if (lefth > righth) {
+        return lefth + 1;
+    } else {
+        return righth + 1;
+    }
+}
