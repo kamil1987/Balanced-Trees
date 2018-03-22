@@ -7,7 +7,8 @@
 
    */
 
-// mozna dochodzac do nowego wezla, odstawiac sciezke do kolejki, pozniej isc w gore drzewa (po kolejce) i sprawdzac czy balance factor jest w zakresie, jak nie, to balansowac
+// poprawic metode balance, ustawione na sztywno, dopisac balans lewo i poprawic wysokosci poddrzew
+   static Queue<Node> queue =new LinkedList<Node>();
    static Node insert(Node root,int val)
     {
       if(root == null){
@@ -16,8 +17,11 @@
         return onlyOneElement;   
     }
     
-       
+       queue.add(root);
         Node newRoot = root;
+      // Node newRoot2 = root;
+        root.ht++;
+   //   System.out.println(root.val + " wys:" + root.ht)  ;
         Node insertThis = new Node();
         insertThis.val = val;
         Node prev=null;
@@ -25,31 +29,71 @@
           while(root != null){
               prev = root;
               if(val <= root.val){
+                  root.ht++;
+       //              System.out.println(root.val + " wys:" + root.ht)  ;
                   root = root.left;
+                  queue.add(root);
               }
               else{
+                  root.ht++;
+           //          System.out.println(root.val + " wys:" + root.ht)  ;
                   root = root.right;
+                  queue.add(root);
               }
                   
           }
           if(val > prev.val){
               prev.right = insertThis;
-              insertThis.ht = prev.ht + 1;
+              insertThis.ht = prev.ht - 1;
           }else{
               prev.left = insertThis;
-              insertThis.ht = prev.ht + 1;
+              insertThis.ht = prev.ht - 1;
           }
-              
-          preOrder(newRoot);
-     levelOrder(newRoot);
+        
+       reversequeue();
+       bala();
+        //  preOrder(newRoot);
+  //   levelOrder(newRoot);
       return newRoot;
     }
+
+
+static void reversequeue()
+    {
+        Stack<Node> stack = new Stack<Node>();
+        while (!queue.isEmpty()) {
+            stack.add(queue.peek());
+            queue.remove();
+        }
+        while (!stack.isEmpty()) {
+            queue.add(stack.peek());
+            stack.pop();
+        }
+    }
+
+
+static void bala(){
+    
+     Node node = queue.poll();
+     node = queue.poll();
+    //System.out.print(node.val);
+    while(queue.peek() != null || node != null){
+       
+      balance(node);
+      node = queue.poll();
+    }
+   
+}
+
+//__________________________________
+
+
 
 static void preOrder(Node root) {
     
     balance(root);
    // System.out.print(" " + root.val + " ");
-    System.out.println();
+    //System.out.println();
     if(root.left != null){
         preOrder(root.left);
     }
@@ -62,9 +106,10 @@ static void preOrder(Node root) {
 
 // to jest zle
 static void balance(Node root){
-     int leftH = (root.left == null) ? 0: root.left.ht ;
-     int rightH = (root.right == null) ? 0: root.right.ht ;
-  //  System.out.print(leftH - rightH);
+     int leftH = (root.left == null) ? 0: height(root.left) ;
+     int rightH = (root.right == null) ? 0: height(root.right) ;
+  //  System.out.println(root.val + " l - r:"+(leftH - rightH));
+    
     
     if (leftH - rightH > 1){ //balansuj w lewo
         Node temp = root;
@@ -73,20 +118,56 @@ static void balance(Node root){
         root.right = temp;
     
     }else if (leftH - rightH  < -1){ // balansuj w prawo
+        Node higherNode = queue.poll();
+        //System.out.println(root.val + " test "  );
         Node temp = root;
-        root = root.right;
-        temp.right = root.left;
-        root.left = temp;
+        if(root.val < root.right.val){
+            
+            higherNode.right = root.right;
+            int newHt = root.ht;
+            root.ht = 1;
+            root = root.right;
+           // temp.right = null;
+            root.left = temp;
+             temp.left = null;
+             temp.right = null;
+            temp.ht = 0;
+            //root.left.ht = 0;
+            
+            
+        }else{
+            
+        }
+        
+       // temp.right = root.left;
+        //root.left = temp;
+    }
+}
+
+static int height(Node root) {
+        
+       if (root == null) {
+        return 0;
+    }
+
+    int lefth = height(root.left);
+    int righth = height(root.right);
+
+    if (lefth > righth) {
+        return lefth + 1;
+    } else {
+        return righth + 1;
     }
 }
 
 static void levelOrder(Node root) {
      
      Queue<Node> queue = new LinkedList<Node>();
-     System.out.print( root.val + " ");
+  //   System.out.print( root.val + " " + root.ht + "     ");
+   //  System.out.println();
      int ht = 0;
      while(queue.peek() != null || root != null){
-
+            
              if(root.left != null){
                  queue.add(root.left);
              }
@@ -95,7 +176,12 @@ static void levelOrder(Node root) {
              }
              
              root = queue.poll();
-             System.out.print( root.val + " ");
+             if(root != null && root.ht > ht){
+                 System.out.println();
+                 ht = root.ht;
+             }
+      ///   if(root != null) System.out.print( root.val + " " + root.ht + "     ");
+        
          
      }
        
